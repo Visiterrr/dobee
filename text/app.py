@@ -86,16 +86,7 @@ def handle_message(event):
     line_bot_api.reply_message(
         event.reply_token, TextSendMessage(text='Hi Welcome to LSTORE'))
     
-@handler.add(FollowEvent)
-def handle_follow(event):
-    welcome_msg = """"Hello! 您好歡迎成為DII好友!
-    我是小幫手
-
-
-
-
-    """
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=welcome_msg))
+if __name__ == "__main__":
+    
+    app.run()
 
