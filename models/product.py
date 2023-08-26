@@ -16,7 +16,7 @@ class Products(Base):
 
 
 
-#列出所有的產品
+    #列出所有的產品
     @staticmethod
     def list_all():
         products = db_session.query(Products).all()#抓取資料庫中所有產品的資料
@@ -72,3 +72,7 @@ class Products(Base):
             bubbles.append(bubble)
 
         carousel_container = CarouselContainer(contents=bubbles)
+
+        message = FlexSendMessage(alt_text='products',contents=carousel_container)
+
+        return message

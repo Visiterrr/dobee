@@ -10,11 +10,16 @@ from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,ImageSendMessage,StickerSendMessage,FollowEvent,UnfollowEvent,
 )
 from linebot.models import *
+from models.database import db_session
 from models.user import Users
-from models.database import db_session, init_db
 
 from models.product import Products
+from sqlalchemy.sql.expression import text
+from models.database import db_session, init_db
+
 from models.cart import Cart
+
+
 app = Flask(__name__)
 
 
@@ -92,11 +97,10 @@ def callback():
 def handle_message(event):
     #event有甚麼資料?詳見補充
     get_or_create_user(event.source.user_id)
-    message_text = str(event/message_text).lower()
+
+    message_text = str(event.message_text).lower()
     cart = Cart(user_id= event.source.user_id)
-    profile = line_bot_api.get_profile(event.source.user_id)
-    uid = profile.user_id #使用者id
-    message_text = str(event.message.text).lower()
+    message = None
 
 
     #使用說明選單
@@ -139,8 +143,8 @@ def handle_message(event):
             message = TextSendMessage(text='Your cart is empty now.')
     if messages:
         line_bot_api.reply_message(
-            event.reply_token,
-            message)
+        event.reply_token,
+        message)
 #初始化產品資訊
 @app.before_first_request
 def init_products():
@@ -167,10 +171,11 @@ def init_products():
 def handle_follow(event):
     welcome_msg = '''歡迎成為DII好友'''
 
-
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=welcome_msg))
 
 if __name__ == "__main__":
-    init_products()
     app.run()     
 
 
