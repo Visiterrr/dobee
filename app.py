@@ -98,7 +98,7 @@ def handle_message(event):
     #event有甚麼資料?詳見補充
     get_or_create_user(event.source.user_id)
 
-    message_text = str(event.message_text).lower()
+    message_text = str(event.message.text).lower()
     cart = Cart(user_id= event.source.user_id)
     message = None
 
@@ -141,7 +141,7 @@ def handle_message(event):
             message = cart.display()
         else:
             message = TextSendMessage(text='Your cart is empty now.')
-    if messages:
+    if message:
         line_bot_api.reply_message(
         event.reply_token,
         message)

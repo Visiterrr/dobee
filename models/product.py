@@ -6,7 +6,7 @@ from urllib.parse import quote
 
 
 class Products(Base):
-    __tablename__ = 'product'
+    __tablename__ = 'products'
 
     id = Column(Integer, primary_key=True)#主鍵
     name = Column(String)#產品名稱
