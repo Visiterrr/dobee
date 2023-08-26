@@ -14,6 +14,7 @@ from models.user import Users
 from models.database import db_session, init_db
 
 from models.product import Products
+from models.cart import Cart
 app = Flask(__name__)
 
 
@@ -91,6 +92,8 @@ def callback():
 def handle_message(event):
     #event有甚麼資料?詳見補充
     get_or_create_user(event.source.user_id)
+    message_text = str(event/message_text).lower()
+    cart = Cart(user_id= event.source.user_id)
     profile = line_bot_api.get_profile(event.source.user_id)
     uid = profile.user_id #使用者id
     message_text = str(event.message.text).lower()
@@ -101,12 +104,43 @@ def handle_message(event):
         about_us_event(event)
     elif message_text == '我想訂購商品':
         message = Products.list_all()
+    #當user要訂購時就會執行這段程式
+    elif "我想要-" in message_text:
+             
+            product_name = message_text.split(',')[0] #利用split(',')拆解並取得第[0]個位置的值
+            #例如COFFEE,I'D LIKE TO HAVE經過SPLIT(',')拆解並取得第[0]後位置就是COFFEE
+            num_item = message_text.rsplit(':')[1]#同理產品就用(':')拆解取得第[1]位置的值
+            #資料庫搜尋是否有這產品名稱
+            product = db_session.query(Products).filter(Products.name.ilike(product_name)).first()
+             #如果有這項產品就會加入
+            if product:
+
+                cart.add(product=product_name, num=num_item)
+                #然後利用confirm_template的格式詢問用戶是否還要加入？
+                confirm_template = ConfirmTemplate(
+                    text='Sure, {} {}, anything else?'.format(num_item, product_name),
+                    actions=[
+                        MessageAction(label='Add', text='add'),
+                        MessageAction(label="That's it", text="That's it")
+                    ])
+
+                message = TemplateSendMessage(alt_text='anything else?', template=confirm_template)
+
+            else:
+                #如果沒有找到產品名稱就會回給用戶沒有這個產品
+                message = TextSendMessage(text="Sorry, We don't have{}.".format(product_name))
+            
+            print(cart.bucket())
+    elif message_text in ['my cart','cart',"that's it"]:#當出現'my cart','cart',"that's it"時
+
+        if cart.bucket():
+            message = cart.display()
+        else:
+            message = TextSendMessage(text='Your cart is empty now.')
     if messages:
         line_bot_api.reply_message(
             event.reply_token,
             message)
-
-
 #初始化產品資訊
 @app.before_first_request
 def init_products():
@@ -119,7 +153,7 @@ def init_products():
                               description='nascetur ridiculus mus. Donec quam felis, ultricies'),
                      Products(name='賞屋',
                               product_image_url='https://i.imgur.com/PRTxyhq.jpg',
-                              price=150,
+                              price=0,
                               description='adipiscing elit. Aenean commodo ligula eget dolor'),
                      Products(name='買屋',
                               price=100000,
@@ -134,7 +168,7 @@ def handle_follow(event):
     welcome_msg = '''歡迎成為DII好友'''
 
 
-    
+
 if __name__ == "__main__":
     init_products()
     app.run()     
