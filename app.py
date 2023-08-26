@@ -104,8 +104,7 @@ def handle_message(event):
     if messages:
         line_bot_api.reply_message(
             event.reply_token,
-            message
-        )
+            message)
 
 
 #初始化產品資訊
@@ -130,7 +129,12 @@ def init_products():
         db_session.commit()#最後commit()才會存進資料庫
         #記得要from models.product import Products在app.py
 
+@handler.add(FollowEvent)
+def handle_follow(event):
+    welcome_msg = '''歡迎成為DII好友'''
 
+
+    
 if __name__ == "__main__":
     init_products()
     app.run()     
