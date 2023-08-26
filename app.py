@@ -14,8 +14,8 @@ from linebot.models import *
 app = Flask(__name__)
 
 
-line_bot_api = LineBotApi('')
-handler = WebhookHandler('')
+line_bot_api = LineBotApi('LxYxudZTtrVQyHDb1nO50EEOdlpxY+XXRy4Zxfcq5PbtcZJPXM42uaffyRgY/0W4ekfmEbaSkX0JeYTBNdtkEAxu28X/5gOdPW6ZX5WF3DdEIyYyY/dsgMEFZ8M9B2h0CynUty7mmJj8vrc56T8yAwdB04t89/1O/w1cDnyilFU=')
+handler = WebhookHandler('02ddd8e36c91b2eb93b74ae54be4da2a')
 
 
 app = Flask(__name__)
@@ -79,14 +79,12 @@ def handle_message(event):
     profile = line_bot_api.get_profile(event.source.user_id)
     uid = profile.user_id #使用者id
     message_text = str(event.message.text).lower()
-
-
-
-    if message_text == '使用說明':
+    if message_text == '@使用說明':
         about_us_event(event)
         
     line_bot_api.reply_message(
         event.reply_token, TextSendMessage(text='Hi Welcome to LSTORE'))
+    
 if __name__ == "__main__":
     
     app.run()
