@@ -10,21 +10,21 @@ from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,ImageSendMessage,StickerSendMessage,FollowEvent,UnfollowEvent,
 )
 from linebot.models import *
-from models.database import db_session
+
 from models.user import Users
 
 from models.product import Products
 from sqlalchemy.sql.expression import text
 from models.database import db_session, init_db
 
-from models.product import Products
 from models.cart import Cart
+
 
 app = Flask(__name__)
 
 
-line_bot_api = LineBotApi('WP3l+IaLvwbZieLYtAZBX1ovU0kXCHPwNNxRWeSMD7Kz1BfsF0UJ1wb7H6xat4qXuC6PfxNyZZ9lF6uRgRnhJevRt84YIhGlHPCjdS+KKaDo7ipGTp0PvJC0x2XL2I6Vxef93vBkbSiti3cX8VNb2AdB04t89/1O/w1cDnyilFU=')
-handler = WebhookHandler('9adf1e3e91823a6cf44096f7cf71c90e')
+line_bot_api = LineBotApi('LxYxudZTtrVQyHDb1nO50EEOdlpxY+XXRy4Zxfcq5PbtcZJPXM42uaffyRgY/0W4ekfmEbaSkX0JeYTBNdtkEAxu28X/5gOdPW6ZX5WF3DdEIyYyY/dsgMEFZ8M9B2h0CynUty7mmJj8vrc56T8yAwdB04t89/1O/w1cDnyilFU=')
+handler = WebhookHandler('02ddd8e36c91b2eb93b74ae54be4da2a')
 
 
 app = Flask(__name__)
@@ -91,30 +91,32 @@ def callback():
         abort(400)
 
     return 'OK'
+	
 
-# 處理訊息
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    #event有什麼資料？詳見補充
+    #event有甚麼資料?詳見補充
     get_or_create_user(event.source.user_id)
-    
+
     message_text = str(event.message.text).lower()
-    cart =  Cart(user_id = event.source.user_id)
+    cart = Cart(user_id= event.source.user_id)
     message = None
-    ######################## 使用說明 選單 油價查詢################################
+
+
+    #使用說明選單
     if message_text == '@使用說明':
         about_us_event(event)
     elif message_text == '我想訂購商品':
         message = Products.list_all()
     #當user要訂購時就會執行這段程式
     elif "i'd like to have" in message_text:
-
-            product_name = message_text.split(',')[0]#利用split(',')拆解並取得第[0]個位置的值
-            # 例如 Coffee,i'd like to have經過split(',')拆解並取得第[0]個位置後就是 Coffee
-            num_item = message_text.rsplit(':')[1]#同理產品就用(':')拆解取得第[1]個位置的值
-            #資料庫搜尋是否有這個產品名稱
+             
+            product_name = message_text.split(',')[0] #利用split(',')拆解並取得第[0]個位置的值
+            #例如COFFEE,I'D LIKE TO HAVE經過SPLIT(',')拆解並取得第[0]後位置就是COFFEE
+            num_item = message_text.rsplit(':')[1]#同理產品就用(':')拆解取得第[1]位置的值
+            #資料庫搜尋是否有這產品名稱
             product = db_session.query(Products).filter(Products.name.ilike(product_name)).first()
-            #如果有這個產品名稱就會加入
+             #如果有這項產品就會加入
             if product:
 
                 cart.add(product=product_name, num=num_item)
@@ -130,19 +132,19 @@ def handle_message(event):
 
             else:
                 #如果沒有找到產品名稱就會回給用戶沒有這個產品
-                message = TextSendMessage(text="Sorry, We don't have {}.".format(product_name))
-
+                message = TextSendMessage(text="Sorry, We don't have{}.".format(product_name))
+            
             print(cart.bucket())
-    elif message_text in ['my cart', 'cart', "that's it"]:#當出現'my cart', 'cart', "that's it"時
+    elif message_text in ['my cart','cart',"that's it"]:#當出現'my cart','cart',"that's it"時
 
-        if cart.bucket():#當購物車裡面有東西時
-            message = cart.display()#就會使用 display()顯示購物車內容
+        if cart.bucket():
+            message = cart.display()
         else:
             message = TextSendMessage(text='Your cart is empty now.')
     if message:
         line_bot_api.reply_message(
         event.reply_token,
-        message) 
+        message)
 #初始化產品資訊
 @app.before_first_request
 def init_products():
@@ -151,40 +153,33 @@ def init_products():
     if result:
         init_data = [Products(name='Coffee',
                               product_image_url='https://i.imgur.com/DKzbk3l.jpg',
-                              price=150,
+                              price=170,
                               description='nascetur ridiculus mus. Donec quam felis, ultricies'),
                      Products(name='Tea',
                               product_image_url='https://i.imgur.com/PRTxyhq.jpg',
-                              price=120,
+                              price=150,
                               description='adipiscing elit. Aenean commodo ligula eget dolor'),
                      Products(name='Cake',
-                              price=180,
+                              price=100,
                               product_image_url='https://i.imgur.com/PRm22i8.jpg',
                               description='Aenean massa. Cum sociis natoque penatibus')]
         db_session.bulk_save_objects(init_data)#透過這個方法一次儲存list中的產品
         db_session.commit()#最後commit()才會存進資料庫
         #記得要from models.product import Products在app.py
-        
-        
-            
-            
-
 
 @handler.add(FollowEvent)
 def handle_follow(event):
-    welcome_msg = """Hello! 您好，歡迎您成為 Master Finance 的好友！
-
-我是Master 財經小幫手 
-
--這裡有股票，匯率資訊喔~
--直接點選下方【圖中】選單功能
-
--期待您的光臨！"""
+    welcome_msg = '''歡迎成為DII好友'''
 
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=welcome_msg))
 
-
 if __name__ == "__main__":
-    app.run()
+    init_products()
+    app.run()     
+
+
+    
+
+    
