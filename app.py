@@ -6,15 +6,15 @@ from linebot import (
 from linebot.exceptions import (
     InvalidSignatureError
 )
-from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage,ImageSendMessage,StickerSendMessage,FollowEvent,UnfollowEvent,
-)
+#from linebot.models import (
+   # MessageEvent, TextMessage, TextSendMessage,ImageSendMessage,StickerSendMessage,FollowEvent,UnfollowEvent)
+
 from linebot.models import *
 
 from models.user import Users
 
 from models.product import Products
-from sqlalchemy.sql.expression import text
+#from sqlalchemy.sql.expression import text
 from models.database import db_session, init_db
 
 from models.cart import Cart

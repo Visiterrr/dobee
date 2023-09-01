@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_utils import database_exists
-
+from collections.abc import Iterable
 import os
 current_dir = os.path.dirname(__file__) #透過os取得目前的路徑
 db_path = r'sqlite:///{}/lstore.db'.format(current_dir)
